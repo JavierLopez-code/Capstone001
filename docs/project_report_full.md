@@ -112,6 +112,33 @@ bootstrap tie that leans favorable. Result: official stress = 14.1% of
 months (within the 5-30% target band), COVID protected from *February*
 2020, 2018Q4/2022 captured, and now 2015-16 as well.
 
+**Supervised comparison: can next month's regime be predicted, not just
+described? (notebook 12).** Logistic regression (with a volatility ×
+correlation interaction) and a random forest were trained to predict whether
+month T+1 is an official STRESS month from the detector's three features at
+month-end T, z-scored with expanding statistics. Temporal cross-validation
+(`TimeSeriesSplit`, 5 folds of 24 months, one-month gap enforcing the
+label-lag rule), pre-declared grids searched with `GridSearchCV`, recall on
+STRESS as the primary metric and `class_weight='balanced'` for the 14%
+minority class; grids, metrics and the decision rule were fixed in markdown
+before any result. Out-of-fold on 120 held-out months (20 STRESS): persistence
+("next month = this month") scores recall 0.70 / precision 0.70 / balanced
+accuracy 0.82; the tuned logistic and random forest reach recall 0.80 but
+with 28 and 23 false alarms against persistence's 6, and balanced accuracy
+0.76 and 0.79. Persistence misses exactly the six episode onsets and
+false-alarms exactly the six exits; the models catch two of the six onsets
+(both inside the 2022 bear) and miss the four sudden ones — for February
+2020 the logistic probability was 0.48. All sixteen hyperparameter
+configurations sit within two points of CV recall: hyperparameters are not
+what limits the task, the information content of three backward-looking
+features at a one-month horizon is. Verdict under rule 6: **prediction
+collapses to description**; no supervised model enters the pipeline and the
+frozen configuration is unchanged. A side finding: in this window the average
+official STRESS month was not a losing month for the diversified book — the
+case for calling stress lives in the tail (10th-percentile STRESS month −3.6%
+vs −2.1% otherwise), which is why recall was the right primary metric and
+also why recall alone is not enough.
+
 ## 6. Backtest results (2010–2026, 5 bps costs, all point-in-time)
 
 | Track | CAGR % | Sharpe | MaxDD % | Calmar |
@@ -221,17 +248,19 @@ wide margin. Its bootstrap vs 60/40 remains the closest to significantly
    the regime detector was tested and cleanly rejected; a revised training
    window (expanding → 5-year rolling) WAS adopted after a dedicated
    backtest, as a disclosed in-sample call, not a proven win; an HMM
-   detector was built and compared against the K-means baseline; an
-   intramonth trigger was tested and not adopted. Kalman remains deferred
+   detector was built and compared against the K-means baseline; a
+   supervised one-step-ahead classifier (logistic and random forest,
+   temporal cross-validation, grid search) did not beat the persistence
+   baseline out-of-fold; an intramonth trigger was tested and not adopted. Kalman remains deferred
    with evidence (no prize available for a finer covariance map).
 4. The most valuable outputs are methodological: the
    significant-vs-exploitable distinction, point-in-time discipline
-   (including label lag), asymmetric hysteresis, and negative findings
+   (including label lag, now exercised in code in notebook 12), asymmetric hysteresis, and negative findings
    documented with the same rigor as positive ones — including when a
    candidate's rejection took two attempts to test fairly (an 8-year
    rolling window gave the 2008-anchoring hypothesis no real chance to be
    tested before concluding a 5-year window was needed).
 
-*All results reproducible from notebooks 01–11 plus one standalone
+*All results reproducible from notebooks 01–12 plus one standalone
 experiment notebook (the regime training-window backtest); every figure and
 table is point-in-time with transaction costs included.*

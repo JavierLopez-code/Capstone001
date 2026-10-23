@@ -102,7 +102,15 @@ FRED), Cleveland Fed recession probability, CAPE (shillerdata.com).
     positives in live tracking, or an expanded universe.
 11. DONE: HMM regime detector, built and compared against the K-means
     baseline (notebooks/11_hmm_regime.ipynb).
-12. Tested as a standalone exercise, not adopted: an intramonth
+12. DONE: supervised model comparison (notebooks/12_supervised.ipynb):
+    logistic regression and random forest predicting whether month T+1 is
+    an official STRESS month from the detector's three features, with
+    temporal cross-validation (TimeSeriesSplit, label-lag gap per rule 5)
+    and pre-declared grid search. Verdict: neither beats the persistence
+    baseline out-of-fold (recall 0.80 vs 0.70, bought with 23-28 false
+    alarms vs 6; balanced accuracy 0.76-0.79 vs 0.82). Not adopted; the
+    frozen configuration is unchanged.
+13. Tested as a standalone exercise, not adopted: an intramonth
     (weekly-check) extraordinary-rebalance trigger
     (a side notebook, not included in this submission), reopening the idea originally
     suspended after step 9 (the monthly regime layer's cost was the
