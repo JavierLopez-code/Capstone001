@@ -11,9 +11,10 @@ date and are stored as computed, never overwritten with recomputed history.
 
 In a walk-forward backtest from 2010-08 to 2026-07 with transaction costs, the final configuration had a worst
 drawdown of **−14.7%** against **−33.7%** for SPY and **−21.3%** for a 60/40 portfolio, with the highest Calmar
-ratio (return per unit of drawdown) of any track in the study. Its Sharpe ratio is a **statistical tie** with
-both benchmarks: in a moving-block bootstrap every Sharpe difference has a 95% confidence interval that spans
-zero. The honest headline is not "the system won" but "same efficiency, radically gentler drawdowns".
+ratio (return per unit of drawdown) of any track in the backtest and variant study (notebooks 08 and 10). Its
+Sharpe ratio is a **statistical tie** with both benchmarks, tested directly: in a moving-block bootstrap every
+Sharpe difference, including the final configuration against 60/40 and against SPY, has a 95% confidence
+interval that spans zero. The honest headline is not "the system won" but "same efficiency, radically gentler drawdowns".
 
 A second finding runs through the whole project: sophistication had to earn its place, and mostly did not.
 Covariance refinements tied three ways, the momentum tilt was neutral, the original regime map cost more than
@@ -55,7 +56,7 @@ architecture, seven inviolable rules and the step plan — are in [capstone_proj
   loads the snapshot, downloads nothing, writes nothing and still runs every validation. Set it to `True` only
   to rebuild the snapshot (needs internet); that overwrites `data/` and changes every downstream result.
 - **Sanity checks are mandatory** after every correlation computation (rule 7): SPY–VEA high (~0.8), SPY–IEF
-  near zero or negative, SHY near zero with everything. In this data SPY–VEA is 0.88 and SHY–IEF 0.78 (weekly).
+  near zero or negative, SHY near zero with everything. In this data SPY–VEA is 0.88 and SHY–IEF 0.78 (weekly, full sample; 0.76 on the common sample from 2007).
 
 #### Methodology
 
@@ -111,6 +112,7 @@ markdown cells.
 
 | Track | CAGR % | Sharpe | MaxDD % | Calmar |
 |---|---|---|---|---|
+| MinVar-LW full chain | 7.3 | 0.924 | −16.6 | 0.439 |
 | 60/40 (SPY/IEF) | 9.8 | 0.878 | −21.3 | 0.460 |
 | RP-LW base (no tilt, no regime) | 7.4 | 0.838 | −16.1 | 0.460 |
 | SPY | 14.7 | 0.810 | −33.7 | 0.437 |
@@ -118,11 +120,23 @@ markdown cells.
 | **Final configuration (V-AB)** | **7.9** | **0.808** | **−14.7** | **0.535** |
 
 - **The drawdown objective was met.** Worst drawdown −14.7% against SPY's −33.7% and 60/40's −21.3%, and the
-  highest Calmar of any track in the study.
+  highest Calmar of any track in the backtest and variant study (notebooks 08 and 10). One caveat for precision:
+  the HMM-detector version of the same configuration, built in notebook 11 as a robustness check and not adopted
+  (Sharpe tie), posts a marginally higher Calmar, 0.551 against 0.535.
 - **Efficiency is a statistical tie.** In the moving-block bootstrap every Sharpe difference between the system,
-  SPY and 60/40 has a 95% confidence interval that spans zero.
+  SPY and 60/40 has a 95% confidence interval that spans zero. The final configuration was tested directly against
+  both benchmarks in notebook 10: −0.120 against 60/40 with CI [−0.47, +0.21], and −0.087 against SPY with CI
+  [−0.46, +0.25].
 - **Where the edge is:** the depth of the hole, not the speed of the climb. After de-risking the system
   participates less in rebounds and, in several episodes, regained its own prior peak no faster than SPY.
+- **Why Risk Parity and not minimum variance.** MinVar-LW full has the highest raw Sharpe of the backtest (0.924)
+  but was not selected, for three reasons that follow from the declared objective. Its drawdown is deeper (−16.6%
+  against −13.0% for the Risk-Parity chain) and its Calmar is the lowest of the system's tracks (0.439), and the
+  objective is drawdown control, not Sharpe. Its weights are a concentrated bet rather than a diversified book:
+  IEF sits at its 35% cap in every month of the sample, gold averages 26%, and VEA and XLE are nearly absent
+  (5% and 2%), with a risk budget dominated by a few assets (notebook 05), so a repeat of 2022, when bonds fell
+  with equities, meets no offset. And the Sharpe gap is a statistical tie: the bootstrap pair added to notebook 09
+  at the final review gives +0.097 with a 95% CI of [−0.08, +0.28].
 
 **Statistical validation** (`outputs/validation_summary.csv`):
 
@@ -133,6 +147,7 @@ markdown cells.
 | RP-LW base − full (cost of the regime layer) | 0.044 | [−0.06, +0.16] | tie |
 | RP-LW full − SPY | −0.112 | [−0.50, +0.26] | tie |
 | RP-LW full − RP-RAW full (shrinkage) | 0.033 | [−0.03, +0.10] | tie |
+| MinVar-LW full − RP-LW full (minimum variance vs Risk Parity) | 0.097 | [−0.08, +0.28] | tie |
 
 The ranking does not hold across the two halves of the sample (60/40 leads in 2010–2017; SPY leads in
 2018–2026), the system's Sharpe gap vs 60/40 reverses to positive in recent years, and the ranking is nearly
@@ -205,10 +220,11 @@ made more precise. No result changed**; these are corrections of wording:
 | "Weekly log returns" | Weekly **simple** returns (Friday-to-Friday price change); the code always used these |
 | max \|acf\| ≈ 0.07 on returns, up to ≈ 0.26 on squared returns | 0.07 and 0.26 are **averages across assets** of each asset's largest autocorrelation; the maxima are 0.082 and 0.396 (XLU). The conclusion holds: 0.082² is under 1% of next-week variance |
 | Weekly covariance chosen because daily returns understate SPY–VEA correlation (close-time lag) | Weekly is a **design choice**, not compared against daily. The lag effect is not present in this data: SPY–VEA correlation is 0.883 daily vs 0.880 weekly, because VEA is a US-listed ETF |
-| SHY ≈ flat against all risk assets | SHY is **weakly** correlated with the risk assets (−0.19 to +0.22) and strongly with IEF (0.78, both Treasuries) |
+| SHY ≈ flat against all risk assets | SHY is **weakly** correlated with the risk assets (−0.20 to +0.22 on the full weekly sample; −0.23 to +0.25 on the common sample from 2007) and strongly with IEF (0.78 full sample, 0.76 common sample; both Treasuries) |
 | SPY–IEF ≈ −0.22 | −0.22 on the full sample; −0.21 on the common sample from 2007 (the one used for clustering) |
 
-What was re-verified and holds as stated: SPY–VEA 0.88 and SHY–IEF 0.78 (weekly); IEF's 3.6% annualized
+What was re-verified and holds as stated: SPY–VEA 0.88 and SHY–IEF 0.78 (weekly, full sample; 0.76 on the common
+sample); IEF's 3.6% annualized
 adjusted return; 193 monthly covariance matrices; Ledoit-Wolf shrinkage between 0.03 and 0.19 with its peak
 (0.186) in March 2020; the asset clusters at k=2 and k=3; the SPY–IEF correlation turning positive in the EWMA
 estimate in June 2022 and in the rolling window in December 2022; and Risk Parity's IEF weight falling from 46%

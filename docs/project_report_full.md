@@ -61,8 +61,9 @@ weekly returns, 3y rolling window
 **Data validation.** Adjusted-price signature confirmed (IEF 3.6%
 annualized — unadjusted data would show ~1%). Correlation sanity: SPY–VEA
 0.88, SPY–IEF −0.22 on the full sample (−0.21 on the common sample from 2007; the
-airbag), SHY weakly correlated with the risk assets (−0.19 to +0.22) and strongly
-with IEF (0.78, both Treasuries), GLD an island.
+airbag), SHY weakly correlated with the risk assets (−0.20 to +0.22 on the full sample,
+−0.23 to +0.25 on the common sample from 2007) and strongly with IEF (0.78 full
+sample, 0.76 common; both Treasuries), GLD an island.
 
 **ACF diagnostics (the design's empirical foundation).** Weekly returns:
 Ljung-Box significant in several assets but the largest |acf| is small (≈ 0.07 on
@@ -143,6 +144,7 @@ also why recall alone is not enough.
 
 | Track | CAGR % | Sharpe | MaxDD % | Calmar |
 |---|---|---|---|---|
+| MinVar-LW full | 7.3 | 0.924 | −16.6 | 0.439 |
 | 60/40 | 9.8 | 0.878 | −21.3 | 0.460 |
 | RP-LW base (no tilt/regime) | 7.4 | 0.838 | −16.1 | 0.460 |
 | SPY | 14.7 | 0.810 | −33.7 | 0.437 |
@@ -156,6 +158,17 @@ also why recall alone is not enough.
 drawdown control, but the gap narrowed sharply once the detector's training
 window was fixed (previously 0.836 → 0.767, a 0.069 cost; now a 0.029 cost) —
 the revised detector is doing its job more cheaply, not just more sensitively.
+
+**Minimum variance vs Risk Parity (the Step-5 competition, settled).**
+MinVar-LW full posts the highest raw Sharpe of the backtest (0.924) but was
+not selected. The objective is drawdown control, and its drawdown is deeper
+(−16.6% vs −13.0% for the Risk-Parity chain) with the lowest Calmar among the
+system's tracks (0.439). Its weights are a concentrated bet — IEF pinned at the
+35% cap in every month, gold ~26%, VEA and XLE nearly absent (5% and 2%), a risk
+budget dominated by a few assets (notebook 05) — so a repeat of 2022, bonds and
+equities falling together, meets no offset. And the Sharpe gap is a bootstrap
+tie: +0.097, CI [−0.085, +0.276] (pair added to notebook 09 at the final review).
+Risk Parity won on the declared criteria, not on Sharpe.
 
 **Covariance ladder.** RAW 0.783 / LW 0.809 / EWMA 0.775 — a three-way tie.
 With 6 liquid assets, estimation error was a small problem. Consequence:
@@ -177,6 +190,8 @@ returns:
 | base − full (regime cost) | 0.044 | [−0.06, +0.16] | TIE |
 | full − SPY | −0.112 | [−0.50, +0.26] | TIE |
 | V-AB − 60/40 | −0.120 | [−0.47, +0.21] | TIE |
+| V-AB − SPY | −0.087 | [−0.46, +0.25] | TIE |
+| MinVar-LW full − RP-LW full | 0.097 | [−0.08, +0.28] | TIE |
 
 **No efficiency difference in this study is statistically distinguishable
 from sampling noise.** The honest headline is not "60/40 won" but "a
@@ -201,7 +216,7 @@ CALM-months shortfall. Winner — **V-AB**: Risk Parity + Ledoit-Wolf, **IEF
 capped at 25%**, momentum tilt ±20%, K-means regime with asymmetric
 hysteresis, **softened exposure map 100/90/60** with 1-month stress exit.
 
-Results: CAGR 7.9%, MaxDD −14.7%, **Calmar 0.535 — best in the entire study — Sharpe tie with all benchmarks.** Note: Calmar was the pre-declared objective metric and drives the selection, but unlike the Sharpe comparisons it was not bootstrap-tested; max drawdown is a single order statistic, so the Calmar ranking is a descriptive fact of this sample, not an established statistical difference. A regime-switching alternative (hold 60/40 in calm, defensive in stress) was tested at the owner's
+Results: CAGR 7.9%, MaxDD −14.7%, **Calmar 0.535 — best among the tracks of the backtest and variant study (notebooks 08 and 10) — Sharpe tie with all benchmarks, tested directly against 60/40 and SPY.** (The HMM-detector version of V-AB in notebook 11, a robustness check that was not adopted, posts 0.551 — a marginal difference inside a Sharpe tie.) Note: Calmar was the pre-declared objective metric and drives the selection, but unlike the Sharpe comparisons it was not bootstrap-tested; max drawdown is a single order statistic, so the Calmar ranking is a descriptive fact of this sample, not an established statistical difference. A regime-switching alternative (hold 60/40 in calm, defensive in stress) was tested at the owner's
 proposal and rejected by the data — and more decisively so under the revised
 (more reactive) detector: it inherits the full 60/40 drawdown in slow-grind
 bears (−21.1% in 2022, vs 60/40's −20.9%) and now switches 16 times over the
@@ -237,7 +252,7 @@ wide margin. Its bootstrap vs 60/40 remains the closest to significantly
 ## 10. Conclusions
 
 1. The declared objective — growth participation with controlled drawdowns
-   — **was met**: worst drawdown one-third of SPY's, recovery times comparable to the benchmarks (the edge is shallower holes, not faster climbs), best Calmar in the study.
+   — **was met**: worst drawdown one-third of SPY's, recovery times comparable to the benchmarks (the edge is shallower holes, not faster climbs), best Calmar among the backtest and variant tracks.
 2. Efficiency (Sharpe) is a **statistical tie** with both SPY and 60/40;
    claims of superiority in either direction are unsupported at this
    sample size.
