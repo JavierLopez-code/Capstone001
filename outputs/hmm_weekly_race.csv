@@ -1,8 +1,0 @@
-episode,episode_start,kmeans_first_STRESS,hmm_first_P>0.5,diff_weeks_HMM_earlier
-2011 (Jul-Oct),2011-07-01,n/a (pre-2013),n/a (pre-2013),
-2015-16 (Aug-Feb),2015-08-01,2015-08-21,none,
-2018Q4 (Oct-Dec),2018-10-01,2018-10-26,none,
-2020 COVID (Feb-Aug),2020-02-19,2020-02-28,2020-03-06,-1.0
-2022 (Jan-Oct),2022-01-01,2022-06-17,2022-08-05,-7.0
-2025 (Apr episode),2025-04-01,2025-04-04,2025-04-04,0.0
-MEAN,,,,-2.6666666666666665

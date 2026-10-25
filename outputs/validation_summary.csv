@@ -1,7 +1,0 @@
-pair,sharpe_diff,ci_low,ci_high,sign_flip_frac
-60/40 - RP-LW base,0.1007,-0.2279,0.4392,0.2686
-60/40 - RP-LW full,0.1451,-0.1842,0.4825,0.185
-RP-LW base - RP-LW full,0.0444,-0.0617,0.1559,0.2001
-RP-LW full - SPY,-0.1123,-0.5032,0.2602,0.2753
-RP-LW full - RP-RAW full,0.0327,-0.0304,0.099,0.1674
-MinVar-LW full - RP-LW full,0.0972,-0.0845,0.2757,0.1476
