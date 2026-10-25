@@ -49,9 +49,14 @@ architecture, seven inviolable rules and the step plan — are in [capstone_proj
   SHY (1–3 year Treasuries), GLD (gold). SPY, VEA, XLE, XLU, IEF and GLD are optimized; SHY is the anchor that
   receives the capital freed when the system reduces exposure.
 - **Market indicators, watched but never traded:** VIX and VIX3M (Yahoo Finance), the 10-year minus 2-year
-  Treasury spread (FRED), the Cleveland Fed recession probability and CAPE.
+  Treasury spread (FRED) and a recession-probability series. Two columns planned in the rules file, the Cleveland
+  Fed recession probability and Shiller's CAPE, were **never populated**: their automated download failed and they
+  remain documented all-NaN placeholders in `data/prices_daily.parquet`. The recession series actually loaded is
+  FRED's RECPROUSM156N (Chauvet–Piger smoothed probability, monthly), a stand-in the code labels as such. None
+  of these indicators enters any model; the regime features use the ETF returns only.
 - **Frozen snapshot.** `data/` holds daily prices, daily returns and weekly (Friday-to-Friday, simple) returns
-  through 2026-08-07. Every notebook runs from it and reproduces the stored outputs exactly. The data switch
+  through 2026-08-07 (the last weekly row is a partial week that closes on Tuesday 2026-08-04, the last daily
+  observation). Every notebook runs from it and reproduces the stored outputs exactly. The data switch
   `REFRESH_DATA` in [01_data.ipynb](notebooks/01_data.ipynb) is **off by default**; with `False` the notebook
   loads the snapshot, downloads nothing, writes nothing and still runs every validation. Set it to `True` only
   to rebuild the snapshot (needs internet); that overwrites `data/` and changes every downstream result.
@@ -83,11 +88,18 @@ Monthly cycle, each step using only data available at that month-end:
    anchored its STRESS centroid, so the slow 2015-16 drawdown was missed. The rolling window was adopted after a
    dedicated backtest ([exp_regime_window_backtest.ipynb](notebooks/exp_regime_window_backtest.ipynb)) as a
    disclosed in-sample decision: Sharpe 0.775 → 0.809, bootstrap CI [−0.048, +0.094], a tie that leans
-   favorable. Official STRESS is 14.1% of months (41% CALM, 45% NORMAL).
+   favorable. Official STRESS is 14.1% of months (41% CALM, 45% NORMAL). Two disclosures: the change was adopted on
+   Sharpe and on catching 2015-16, while the pre-declared objective metric moved marginally the other way (Calmar
+   0.484 → 0.479 at an identical −13.0% drawdown); and the detector's first label is 2013-01 while the backtest
+   starts 2010-08, so for the first 30 months every regime-scaled track runs at the fixed NORMAL exposure (80%,
+   or 90% under the softer map) — the 2011 episode in the crisis table reflects the covariance and weighting
+   layers only, not the detector.
 6. **Final weights → monthly rebalance.**
 7. **Validation and challengers**, all under rule 6 ("simple beats sophisticated until proven otherwise"):
    - **Walk-forward backtest** with 5 bps one-way transaction costs and crisis event studies
-     ([08_backtest.ipynb](notebooks/08_backtest.ipynb)).
+     ([08_backtest.ipynb](notebooks/08_backtest.ipynb)). The event studies cover the sample's six episodes, 2011
+     to 2025; the 2000-02 and 2008 crises named in the step plan fall before the backtest window, which starts in
+     2010-08 because VEA begins in 2007 and the covariance needs three years of weekly history.
    - **Moving-block bootstrap** on Sharpe differences (6-month blocks, 10,000 resamples, paired monthly
      returns), period splits and cost sensitivity ([09_validation.ipynb](notebooks/09_validation.ipynb)).
    - **Five pre-declared aggressiveness variants** tested through the same engine, Calmar as the pre-declared
@@ -119,6 +131,8 @@ markdown cells.
 | RP-LW full chain | 6.2 | 0.809 | −13.0 | 0.479 |
 | **Final configuration (V-AB)** | **7.9** | **0.808** | **−14.7** | **0.535** |
 
+Sharpe in this table and in the variant table below is computed on **daily** returns. The bootstrap uses **monthly** returns, as its specification requires, and on that definition levels and ordering differ: SPY 0.950 and 60/40 0.983 sit above MinVar-LW 0.935 and RP-LW full 0.838. Every verdict is unaffected because every bootstrap comparison is a tie, but the two numbers are not interchangeable and the README now says which one each table uses.
+
 - **The drawdown objective was met.** Worst drawdown −14.7% against SPY's −33.7% and 60/40's −21.3%, and the
   highest Calmar of any track in the backtest and variant study (notebooks 08 and 10). One caveat for precision:
   the HMM-detector version of the same configuration, built in notebook 11 as a robustness check and not adopted
@@ -129,7 +143,8 @@ markdown cells.
   [−0.46, +0.25].
 - **Where the edge is:** the depth of the hole, not the speed of the climb. After de-risking the system
   participates less in rebounds and, in several episodes, regained its own prior peak no faster than SPY.
-- **Why Risk Parity and not minimum variance.** MinVar-LW full has the highest raw Sharpe of the backtest (0.924)
+- **Why Risk Parity and not minimum variance.** MinVar-LW full has the highest daily-return Sharpe in the Step 8 table (0.924; on monthly returns it is third,
+  behind 60/40 and SPY)
   but was not selected, for three reasons that follow from the declared objective. Its drawdown is deeper (−16.6%
   against −13.0% for the Risk-Parity chain) and its Calmar is the lowest of the system's tracks (0.439), and the
   objective is drawdown control, not Sharpe. Its weights are a concentrated bet rather than a diversified book:
@@ -138,7 +153,8 @@ markdown cells.
   with equities, meets no offset. And the Sharpe gap is a statistical tie: the bootstrap pair added to notebook 09
   at the final review gives +0.097 with a 95% CI of [−0.08, +0.28].
 
-**Statistical validation** (`outputs/validation_summary.csv`):
+**Statistical validation** (`outputs/validation_summary.csv`; Sharpe on monthly returns, see the note under the
+headline table):
 
 | Pair | Sharpe difference | 95% CI | Verdict |
 |---|---|---|---|
@@ -197,7 +213,8 @@ was rejected by the data: it puts the whole book on the detector at every transi
 
 ##### Crisis episodes (detail)
 
-Full chain vs SPY vs 60/40; total return / worst drawdown inside the episode:
+Full chain vs SPY vs 60/40; total return / worst drawdown inside the episode. The 2011 episode predates the
+detector's first label (2013-01), so it reflects covariance and weighting only:
 
 | Episode | RP-LW full chain | SPY | 60/40 |
 |---|---|---|---|

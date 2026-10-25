@@ -80,7 +80,8 @@ The dendrogram placed XLU as the most distant equity member (the defensive)
 and GLD as a genuine third behavior — diversification is real, not nominal.
 
 **Covariance estimation.** ~190 point-in-time monthly matrices. Ledoit-Wolf
-shrinkage intensity self-calibrated in 0.03–0.19, doubling in March 2020
+shrinkage intensity self-calibrated in 0.03–0.19, rising from 0.055 in
+January to 0.138 in February and 0.186 in March 2020
 (chaotic sample → more shrinkage) — statistical humility as a formula. Key
 market finding: the SPY–IEF correlation, negative for a decade, **flipped
 positive in 2022** (the airbag failure year); the rolling estimation saw it,
@@ -97,9 +98,10 @@ symmetric rules violate the asymmetry of harms. Fix: **asymmetric
 hysteresis** — enter stress on 1 signal, exit on 2.
 
 **Training window revised: expanding → 5-year rolling.** With the asymmetric
-fix alone, stress still sat at only ~3% of months (expanding window), because
+fix alone, official stress was 8.0% of months (expanding window; the 3.1%
+figure belongs to the symmetric rule), inside the 5-30% target band — yet
 2008 never left the training set and permanently anchored the STRESS
-centroid at crisis-level volatility — the detector caught every sharp
+centroid at crisis-level volatility, so the detector caught every sharp
 episode (2018Q4, 2020, 2022) but missed the slow 2015-16 drawdown entirely.
 Diagnosed with a cheap, rejected control first (adding VIX as a 4th feature
 changed nothing — the problem was the training window's reference scale, not
@@ -109,7 +111,10 @@ window wasn't long enough to exclude 2008 by 2015-16 (no fair test); a
 reads STRESS). Adopted after a dedicated walk-forward backtest confirmed the
 effect holds for real portfolio performance, not just regime-frequency
 diagnostics (§6-7) — disclosed as an in-sample decision, validated only to a
-bootstrap tie that leans favorable. Result: official stress = 14.1% of
+bootstrap tie that leans favorable. On the pre-declared objective metric the
+change is marginally worse — Calmar 0.484 → 0.479 at an identical −13.0%
+drawdown — so it was adopted on Sharpe and on catching 2015-16, and this is
+disclosed. Result: official stress = 14.1% of
 months (within the 5-30% target band), COVID protected from *February*
 2020, 2018Q4/2022 captured, and now 2015-16 as well.
 
@@ -151,17 +156,20 @@ also why recall alone is not enough.
 | RP-LW full chain | 6.2 | 0.809 | −13.0 | 0.479 |
 | **Final config (V-AB)** | **7.9** | **0.808** | **−14.7** | **0.535** |
 
-**Crisis episodes (full chain vs SPY)**: 2011: +3.9% vs −4.4%; **2015-16 (now caught by the revised detector): −0.6% vs −7.0%** (recovery 4.6 months, vs 2.1 for SPY — the system still trades climb-speed for hole-depth even here); 2018Q4: −3.2% vs −13.5% (maxDD −4.9% vs −19.2%, trough-to-recovery 5.8 vs 3.6 months); COVID: max drawdown −10.7% vs −33.7%, recovery 4.5 vs 4.6 months; 2022: −9.3% vs −17.7% (maxDD −13.0% vs −24.5%, recovery 15.0 vs 14.0 months). The "controlled drawdowns" objective was met in every episode of the sample, now including the slow-grind case the detector originally missed. An honest nuance surfaced by a bug fix: the system's edge is the depth of the hole, not the speed of the climb — after de-risking it participates less in rebounds, and in several episodes it regained its own prior peak later than SPY despite falling much less. Earlier drafts reported implausibly short recovery times caused by a reference-peak bug in the episode windows, since corrected in notebook 08.
+**Crisis episodes (full chain vs SPY)**: 2011 (before the detector's first label in 2013-01, so covariance and weighting only): +3.9% vs −4.4%; **2015-16 (now caught by the revised detector): −0.6% vs −7.0%** (recovery 4.6 months, vs 2.1 for SPY — the system still trades climb-speed for hole-depth even here); 2018Q4: −3.2% vs −13.5% (maxDD −4.9% vs −19.2%, trough-to-recovery 5.8 vs 3.6 months); COVID: max drawdown −10.7% vs −33.7%, recovery 4.5 vs 4.6 months; 2022: −9.3% vs −17.7% (maxDD −13.0% vs −24.5%, recovery 15.0 vs 14.0 months). The "controlled drawdowns" objective was met in every episode of the sample, now including the slow-grind case the detector originally missed. An honest nuance surfaced by a bug fix: the system's edge is the depth of the hole, not the speed of the climb — after de-risking it participates less in rebounds, and in several episodes it regained its own prior peak later than SPY despite falling much less. Earlier drafts reported implausibly short recovery times caused by a reference-peak bug in the episode windows, since corrected in notebook 08.
 
 **Layer attribution.** Sharpe: base 0.838 →
 +tilt 0.825 → +regime 0.809. The regime layer still trades some Sharpe for
 drawdown control, but the gap narrowed sharply once the detector's training
-window was fixed (previously 0.836 → 0.767, a 0.069 cost; now a 0.029 cost) —
+window was fixed (previously 0.836 → 0.767, a 0.069 cost; now a 0.029 cost — both on
+daily-return Sharpe; the bootstrap in §7 measures the same gap on monthly
+returns, 0.044) —
 the revised detector is doing its job more cheaply, not just more sensitively.
 
 **Minimum variance vs Risk Parity (the Step-5 competition, settled).**
-MinVar-LW full posts the highest raw Sharpe of the backtest (0.924) but was
-not selected. The objective is drawdown control, and its drawdown is deeper
+MinVar-LW full posts the highest daily-return Sharpe of the backtest table
+(0.924; on monthly returns, the bootstrap's definition, it ranks third behind
+60/40 and SPY) but was not selected. The objective is drawdown control, and its drawdown is deeper
 (−16.6% vs −13.0% for the Risk-Parity chain) with the lowest Calmar among the
 system's tracks (0.439). Its weights are a concentrated bet — IEF pinned at the
 35% cap in every month, gold ~26%, VEA and XLE nearly absent (5% and 2%), a risk
@@ -181,7 +189,9 @@ blind spot was diagnosed.
 ## 7. Statistical validation (the step that rewrote the verdict)
 
 Moving-block bootstrap (6-month blocks, 10,000 resamples) on paired monthly
-returns:
+returns. Sharpe here is computed on monthly returns, so its levels differ
+from the daily-return Sharpe of the §6 table (e.g. SPY 0.950 vs 0.810); only
+differences within one definition are comparable:
 
 | Pair | Sharpe diff | 95% CI | Verdict |
 |---|---|---|---|
@@ -204,10 +214,12 @@ simple system essentially matches 60/40 (0.725 vs 0.722) with little more
 than half the drawdown (−12.1% vs −20.5%). Regime decomposition (revised
 detector): the governing-regime split flipped from mostly-CALM to
 mostly-non-CALM (67 CALM vs 125 NORMAL+STRESS months, inverted from the
-expanding-window detector's 112/79) — the system's shortfall now lives in
-a smaller, more genuinely-calm CALM bucket (7.5% vs SPY's 12.4% annualized),
-while NON-CALM months are closer between the two (5.6% vs 16.0%) than
-before, since fewer months get the "calm" label in the first place.
+expanding-window detector's 112/79). Against SPY the shortfall is larger in
+NON-CALM months (5.6% vs 16.0% annualized) than in CALM ones (7.5% vs 12.4%):
+the regime layer pays precisely when it is active, because every in-sample
+sell-off reversed quickly and the reduced exposure missed the rebounds.
+Against its own base, the full chain earns in CALM months (7.5% vs 6.7%) and
+pays in NON-CALM ones (5.6% vs 7.8%) — the same point seen from the other side.
 
 ## 8. Final configuration (chosen by the data)
 
@@ -230,8 +242,12 @@ wide margin. Its bootstrap vs 60/40 remains the closest to significantly
 1. **The sample contains no long bear market.** Every crisis 2010–2026
    recovered in a V (2015-16 included, once the detector was fixed to see
    it). The regime layer's insurance value against a 2000–2002-type 30-month
-   decline is untested and untestable with this data. Its measured cost
-   (~0.044 Sharpe, itself a statistical tie, down from ~0.08 before the
+   decline is untested and untestable with this data. The 2000-02 and 2008
+   crises named in the step plan predate the backtest window, which starts
+   2010-08 because VEA begins in 2007 and the covariance needs three years of
+   weekly history, so they could not be studied as events. Its measured cost
+   (~0.044 Sharpe on monthly returns, the bootstrap's definition, itself a
+   statistical tie; 0.029 on daily-return Sharpe, down from 0.069 before the
    detector revision) is the premium for that unobserved scenario — keeping
    it is a declared preference, not a statistical conclusion.
 2. **Five parameters were adjusted after seeing results** (asymmetric
@@ -252,7 +268,7 @@ wide margin. Its bootstrap vs 60/40 remains the closest to significantly
 ## 10. Conclusions
 
 1. The declared objective — growth participation with controlled drawdowns
-   — **was met**: worst drawdown one-third of SPY's, recovery times comparable to the benchmarks (the edge is shallower holes, not faster climbs), best Calmar among the backtest and variant tracks.
+   — **was met**: worst drawdown less than half of SPY's (−14.7% vs −33.7%), recovery times comparable to the benchmarks (the edge is shallower holes, not faster climbs), best Calmar among the backtest and variant tracks.
 2. Efficiency (Sharpe) is a **statistical tie** with both SPY and 60/40;
    claims of superiority in either direction are unsupported at this
    sample size.

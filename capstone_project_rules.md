@@ -67,12 +67,16 @@ FRED), Cleveland Fed recession probability, CAPE (shillerdata.com).
 - Plain pandas/numpy/sklearn/scipy. NO custom frameworks, NO class
   hierarchies, NO abstraction layers. Simple functions, clear names.
 - Explain non-obvious steps in short markdown cells (Javier reads everything).
-- Data to `data/` (raw and processed separate). Point-in-time outputs to
+- Data to `data/` (raw and processed separate in intent; the submitted
+  snapshot holds adjusted prices plus derived daily and weekly returns in one
+  folder, named by content). Point-in-time outputs to
   `outputs/` as parquet/csv with a date column meaning "as computed at".
 - Do NOT skip ahead. Implement only the step requested in the prompt.
   The step-by-step specs come separately.
   - Every notebook's FIRST cell is a markdown cell with the full spec/prompt
-  for that step, verbatim, titled "# Step N — Specification".
+  for that step, verbatim, titled "# Step N — Specification". Exception: the side experiment
+  notebooks/exp_regime_window_backtest.ipynb opens with "# Experiment — …";
+  its motivation cell plays the role of the spec.
 
 ## Step plan (specs arrive one at a time — do not pre-build)
 
@@ -92,7 +96,10 @@ FRED), Cleveland Fed recession probability, CAPE (shillerdata.com).
    same asymmetric hysteresis as v1 — only the training window changed.
 7. Momentum tilt + full monthly pipeline assembly
 8. Walk-forward backtest with transaction costs + crisis event studies
-   (2000-02, 2008, 2020, 2022)
+   (planned: 2000-02, 2008, 2020, 2022; in practice the backtest starts
+   2010-08 — VEA begins in 2007 and the covariance needs 3 years of weekly
+   history — so the event studies cover 2011, 2015-16, 2018Q4, 2020, 2022
+   and 2025, and 2000-02 / 2008 fall outside the window)
 9. Statistical validation: bootstrap, sensitivity analysis
 10. Aggressiveness rebalance: five pre-declared variants (IEF cap,
     softer/faster regime map, combined, growth risk-budget, regime
